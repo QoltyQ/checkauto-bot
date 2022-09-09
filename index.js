@@ -1,5 +1,4 @@
 const TelegramApi = require('node-telegram-bot-api');
-const axios = require('axios');
 
 const token = '5451607839:AAEp7E18xySiHJDcanCfiYerej926oAE9OE';
 
@@ -13,8 +12,7 @@ const gameOptions = {
             [{text: 'Расшифровка', callback_data: 'vin'}, {text: 'ГИБДД', callback_data: 'gibdd'} ],
             [{text: 'Отзывные компании ТС', callback_data: 'gost'}]
         ]
-    }),
-    parse_mode: 'HTML'
+    })
 };
 
 const againOptions = {
@@ -48,12 +46,7 @@ const start = async () => {
         }
     
         if(text === '/info'){
-            return bot.sendMessage(chatId, 'Пожалуйста, отправьте вин-код и выберите услуги');
-        }
-        if(text === "1"){
-            let message = "<b>TEST</b> osilay karoche <b>OSOSOOS</b>";
-            let str = encodeURIComponent(message);
-            await bot.sendMessage(chatId, message, {parse_mode: 'HTML'});
+            return bot.sendMessage(chatId, `Пожалуйста, отправьте вин-код и выберите услуги.`);
         }
         let words = text.split(' ');
         if(words.length == 1){
@@ -74,6 +67,7 @@ const start = async () => {
     bot.on('callback_query', async msg => {
         const data = msg.data;
         const chatId = msg.message.chat.id;
+        let str = "";
         if (data === '/again') {
             return startGame(chatId)
         }
@@ -82,7 +76,7 @@ const start = async () => {
             await vin(vinCode).then(async (ans) => {
                 await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
             });     
-            await bot.sendMessage(chatId,"Хотите проверить еще раз?",againOptions);
+            await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
         } 
         else if(data === "gibdd"){
             await bot.sendMessage(chatId,"Это может занять некоторое время, пожалуйста подождите");
@@ -102,9 +96,14 @@ const start = async () => {
             await wasted(vinCode).then(async (ans) => {
                 await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
             });
-            await bot.sendMessage(chatId,"Хотите проверить еще раз?",againOptions);
+            await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
         }
         else{
+            await bot.sendMessage(chatId,"Это может занять некоторое время, пожалуйста подождите");
+            await gost(vinCode).then(async (ans) => {
+                await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
+            });
+            await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
         }  
     })
 }
