@@ -1,12 +1,8 @@
 const {Sequelize} = require('sequelize');
-var tunnel = require('tunnel-ssh'); 
 const {NodeSSH} = require('node-ssh')
 const {DataTypes} = require('sequelize');
 
-
-
-const ssh = new NodeSSH()
-const sequelize = new Sequelize('postgres://postgres:B6d3k9GA@78.40.109.128:5432/checkauto_bot');
+const sequelize = new Sequelize('postgres://postgres:B6d3k9GA@127.0.0.1:5432/checkauto_bot');
 
 const testingConnection = async () => {
     try {
@@ -18,13 +14,8 @@ const testingConnection = async () => {
     }
 }       
 
-ssh.connect({
-    host: '78.40.109.128',
-    username: 'root',
-    password: 'nYClp7670p'
-}).then(function (){
-    testingConnection();
-})
+testingConnection();
+
 
 const User = sequelize.define('user', {
     id: {type: DataTypes.INTEGER, primaryKey: true, unique: true, autoIncrement: true},
