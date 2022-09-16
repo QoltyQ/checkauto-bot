@@ -3,6 +3,7 @@ const {NodeSSH} = require('node-ssh')
 const {DataTypes} = require('sequelize');
 
 const sequelize = new Sequelize('postgres://postgres:B6d3k9GA@127.0.0.1:5432/checkauto_bot');
+// const sequelize = new Sequelize('postgres://check_auto:B6d3k9GA@127.0.0.1:5432/checkauto-bot');
 
 const testingConnection = async () => {
     try {

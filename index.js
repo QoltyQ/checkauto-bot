@@ -29,6 +29,7 @@ const startGame = async (chatId) => {
 
 const start = async () => {
     
+    let requestNumber = 0;
     let vinCode = '';
 
     bot.setMyCommands([
@@ -41,53 +42,66 @@ const start = async () => {
         const chatId = msg.chat.id;
     
         if(text === '/start'){
-            // const user = await UserModel.findOrCreate({
-            //     where: { chatId: chatId },
-            //   }).then(() => console.log("ASAAAAAASAS"))
-            //   .catch((error)=> console.log(error,"qate"));
             const user = await UserModel.create({chatId})
             .then(() => {
                 console.log("created")
             }).catch(() => console.log("exists"));
-            // if(user === null)
-            // {
-            //     await UserModel.create({chatId});
-            // }
             await bot.sendSticker(chatId, 'https://tlgrm.eu/_/stickers/ccd/a8d/ccda8d5d-d492-4393-8bb7-e33f77c24907/1.webp');
             return bot.sendMessage(chatId, 'Добро пожаловать в телеграм бот Checkauto\nЗдесь вы сможете получить информацию о машине через вин-код. Чекавто проверяет юр. чистоту авто по данным РФ, (остальные страны, Корея, Америка, Дубай по запросу в личку админу)')
         }
     
-        if(text === '/info'){
+        else if(text === '/info'){
             await UserModel.findOne({where: {chatId: chatId.toString()}})
             .then((user) => {
-                return bot.sendMessage(chatId, `Тебя зовут ${chatId}, в игре у тебя правильных ответов ${user.isVerified}, неправильных ${user.requests}`);
+                if(user.requests > 0)
+                    return bot.sendMessage(chatId, `Привет, у вас есть еще ${user.requests}. Пожалуйста, отправьте вин-код и выберите услуги.`);
+                else{
+                    return bot.sendMessage(chatId, `Привет, у вас закончились число доступных запросов . Пожалуйста, свяжитесь с Админом :).`);
+                }
             })
-            .catch(() => console.log(chatId));
-            return bot.sendMessage(chatId, `Пожалуйста, отправьте вин-код и выберите услуги.`);
+            .catch(() => {
+                return bot.sendMessage(chatId, `Я вас не знаю:( Свяжитесь с Админом :)`)
+            });
         }
-        if(text === 'verify'){
+        else if(text === 'verify'){
             await UserModel.update(
                 {
                     requests: 50,
                     isVerified: true,
                 },
                 {
-                    where: {chatId: chatId}
+                    where: {chatId: chatId.toString()}
                 }
-                );
-            const user = await UserModel.findOne({chatId});
-            console.log(chatId);
-            return bot.sendMessage(chatId, `Тебя зовут ${chatId}, в игре у тебя правильных ответов ${user.isVerified}, неправильных ${user.requests}`);
-            return bot.sendMessage(chatId, `Пожалуйста, отправьте вин-код и выберите услуги.`);
+                ).then(() => {
+                    return bot.sendMessage(chatId, `Успешно Верифицирован`);
+                }).catch(() => {
+                    return bot.sendMessage(chatId, `Простите, но я не смог вас найти:(`);
+                });
         }
-        if(text === undefined){
+        else if(text === undefined){
             return bot.sendMessage(chatId, `Я вас не понимаю, пожалуйста попробуйте позже`);
-        } else {
+        } 
+        else if(text === "decrease"){
+            await UserModel.update(
+                {
+                    requests: 1,
+                },
+                {
+                    where: {chatId: chatId.toString()}
+                }
+                )
+                const user = await UserModel.findOne({where: {chatId: chatId.toString()}});
+                return bot.sendMessage(chatId, `число запросов: ${user.requests}`);
+            } else {
             let words = text.split(' ');
             if(words.length == 1){
                 if(text.length == 17){
-                    await bot.sendMessage(chatId, "Выберите услугу", gameOptions);
-                    vinCode = text;
+                    if(requestNumber > 0){
+                        await bot.sendMessage(chatId, "Выберите услугу", gameOptions);
+                        vinCode = text;
+                    } else{
+                        await bot.sendMessage(chatId, "У вас закончились число доступных запросов . Пожалуйста, свяжитесь с Админом :)");
+                    }
                 }
                 else if(text.length < 17)
                     await bot.sendMessage(chatId, "не хватает символов, вин код состоит из 17 символов")
@@ -98,6 +112,14 @@ const start = async () => {
                 await bot.sendMessage(chatId, "отправьте вин код без пробелов")
             }
         }
+        await UserModel.findOne({where: {chatId: chatId.toString()}})
+            .then((user) => {
+                requestNumber = user.requests;
+            })
+            .catch(() => {
+                return bot.sendMessage(chatId, "Я вас не знаю( Свяжитесь с Админом :)")}
+                );
+        
     })
 
     bot.on('callback_query', async msg => {
@@ -108,13 +130,34 @@ const start = async () => {
             return startGame(chatId)
         }
         if (data === "vin") {
+            requestNumber--;
+            await UserModel.update(
+                {
+                    requests: requestNumber,
+                },
+                {
+                    where: {chatId: chatId.toString()}
+                }
+                );
             await bot.sendMessage(chatId,"Это может занять некоторое время, пожалуйста подождите");
             await vin(vinCode).then(async (ans) => {
                 await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
             });     
-            await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
+            if(requestNumber > 0)
+                await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
+            else
+                await bot.sendMessage(chatId,`Ой у вас закончились число доступных запросов, свяжитесь с Админом :)`);
         } 
         else if(data === "gibdd"){
+            requestNumber--;
+            await UserModel.update(
+                {
+                    requests: requestNumber,
+                },
+                {
+                    where: {chatId: chatId.toString()}
+                }
+                );
             await bot.sendMessage(chatId,"Это может занять некоторое время, пожалуйста подождите");
             await gibdd(vinCode).then(async (ans) => {
                 await bot.sendMessage(chatId,"Информация машины из ГИБДД")
@@ -132,14 +175,29 @@ const start = async () => {
             await wasted(vinCode).then(async (ans) => {
                 await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
             });
-            await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
+            if(requestNumber > 0)
+                await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
+            else
+                await bot.sendMessage(chatId,`Ой у вас закончились число доступных запросов, свяжитесь с Админом :)`);
         }
         else{
+            requestNumber--;
+            await UserModel.update(
+                {
+                    requests: requestNumber,
+                },
+                {
+                    where: {chatId: chatId.toString()}
+                }
+                );
             await bot.sendMessage(chatId,"Это может занять некоторое время, пожалуйста подождите");
             await gost(vinCode).then(async (ans) => {
                 await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
             });
-            await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
+            if(requestNumber > 0)
+                await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
+            else
+                await bot.sendMessage(chatId,`Ой у вас закончились число доступных запросов, свяжитесь с Админом :)`);
         }  
     })
 }
