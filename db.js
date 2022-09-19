@@ -21,6 +21,8 @@ testingConnection();
 const User = sequelize.define('user', {
     id: {type: DataTypes.INTEGER, primaryKey: true, unique: true, autoIncrement: true},
     chatId: {type: DataTypes.STRING, unique: true},
+    userName: {type: DataTypes.STRING, unique: true},
+    phone: {type: DataTypes.STRING, unique: true},
     requests: {type: DataTypes.INTEGER, defaultValue: 0},
     isVerified: {type: DataTypes.BOOLEAN, defaultValue: false},
 })
