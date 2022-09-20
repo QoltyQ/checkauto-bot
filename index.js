@@ -99,11 +99,11 @@ const start = async () => {
             let words = text.split(' ');
             if(words.length == 1){
                 if(!isAdmin){
+                    await UserModel.findOne({where: {userName: msg.chat.username}}).then((user) => {
+                        allow = 1;
+                        requestNumber = user.requests; 
+                    }).catch(() => console.log("hayir"));
                     if(text.length == 17){
-                        await UserModel.findOne({where: {userName: msg.chat.username}}).then((user) => {
-                            allow = 1;
-                            requestNumber = user.requests; 
-                        }).catch(() => console.log("hayir"));
                         if(allow){
                             if(requestNumber > 0){
                                 // console.log(requestNumber)
