@@ -102,7 +102,7 @@ const start = async () => {
                     await UserModel.findOne({where: {userName: msg.chat.username}}).then((user) => {
                         allow = 1;
                         requestNumber = user.requests; 
-                    }).catch(() => console.log("hayir"));
+                    }).catch(() => allow = 0);
                     if(text.length == 17){
                         if(allow){
                             if(requestNumber > 0){
@@ -118,6 +118,7 @@ const start = async () => {
                     }
                     else if(text.length < 17)
                     {
+                        console.log(allow)
                         if(allow)
                             await bot.sendMessage(chatId, "Проверьте свой вин код. Потому что,не хватает символов, вин код состоит из 17 символов")
                         else
