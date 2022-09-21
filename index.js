@@ -54,7 +54,7 @@ const start = async () => {
     bot.on('message', async msg => {
         const text = msg.text;
         const chatId = msg.chat.id;
-        let allow = false;
+        let allow = 0;
         isAdmin = true ? chatId == admin : false;
         requestNumber = 0;
         
