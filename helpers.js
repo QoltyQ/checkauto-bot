@@ -22,11 +22,66 @@ const gibdd = async (text) => {
                     utilization = `<b>Утилизация:</b> ${check}\n`;
                     
                     response = `${utilization}<b>Машина:</b> ${car} \n\n<b>Пасспорт:</b> ${passport} \n\n<b>История регистрации:</b> ${obj}`;
-                    console.log(response);
                 }
                 else
                 {
                     response = res.data.message + " для проверки ГИБДД";
+                }
+                 resolve(response);
+            })
+            .catch((error) => console.log(error));
+    });
+}
+
+const zalog = async (text) => {
+    return new Promise((resolve, reject) => {
+        const url = `https://api-cloud.ru/api/zalog.php?type=notary&vin=${text}&token=a93da7c54a600fe89d6770f6f45ebf5b`;
+        axios.get(url)
+            .then(async (res) => {
+                let response = "response:";
+                if(res.data.num > 0)
+                {   
+                    let obj = [];
+                    res.data.rez.forEach(element => {obj.push(`\n\n<b>Дата записи:</b> ${element.regDate},\n <b>Залогодатель:</b>\n\n<b>   Имя физ лица или организации:</b>${element.pledgors.name}\n<b>   Тип залогодателя:</b> ${element.pledgors.nameDetal},\n<b>   Дата рождения:</b> ${element.pledgors.birthday},\n\n <b>Залогодержатель:</b> ${element.pledgees.name}\n <b>VIN:</b> ${element.period}\n`); return obj});
+                    
+                    let history = [];
+                    res.data.history.forEach(element => {
+                        history.push(`\n\n<b>ID:</b> ${element.id},\n <b>Дата регистрации:</b> ${element.regDate}\n <b>Дата регистрации в UNIX:</b> ${element.regDateUnix},\n <b>Тип записи:</b> ${element.type},\n\n <b>Расшифровка типа записи:</b> ${element.typeTitle}\n`); 
+                        return history;
+                    })
+                    response = `<b>Количество результата:</b> ${res.data.num}\n${obj}\n\n <b>История изменений:</b>\n\n ${history}`;
+                }
+                else
+                {
+                    response = res.data.message;
+                }
+                 resolve(response);
+            })
+            .catch((error) => console.log(error));
+    });
+}
+
+const fedresurs = async (text) => {
+    return new Promise((resolve, reject) => {
+        const url = `https://api-cloud.ru/api/zalog.php?type=fedresurs&vin=${text}&token=a93da7c54a600fe89d6770f6f45ebf5b`;
+        axios.get(url)
+            .then(async (res) => {
+                let response = "response:";
+                if(res.data.num > 0)
+                {   
+                    let obj = [];
+                    res.data.rez.forEach(element => {obj.push(`\n\n<b>Дата записи:</b> ${element.regDate},\n <b>Залогодатель:</b>\n\n<b>   Имя физ лица или организации:</b>${element.pledgors.name}\n<b>   Тип залогодателя:</b> ${element.pledgors.nameDetal},\n<b>   Дата рождения:</b> ${element.pledgors.birthday},\n\n <b>Залогодержатель:</b> ${element.pledgees.name}\n <b>VIN:</b> ${element.period}\n`); return obj});
+                    
+                    let history = [];
+                    res.data.history.forEach(element => {
+                        history.push(`\n\n<b>ID:</b> ${element.id},\n <b>Дата регистрации:</b> ${element.regDate}\n <b>Дата регистрации в UNIX:</b> ${element.regDateUnix},\n <b>Тип записи:</b> ${element.type},\n\n <b>Расшифровка типа записи:</b> ${element.typeTitle}\n`); 
+                        return history;
+                    })
+                    response = `<b>Количество результата:</b> ${res.data.num}\n${obj}\n\n <b>История изменений:</b>\n\n ${history}`;
+                }
+                else
+                {
+                    response = res.data.message;
                 }
                  resolve(response);
             })
@@ -77,6 +132,30 @@ const dtp = async (text) => {
     });
 }
 
+const eaisto = async (text) => {
+    return new Promise((resolve,reject) => {
+        const url = `https://api-cloud.ru/api/gibdd.php?vin=${text}&type=eaisto&token=a93da7c54a600fe89d6770f6f45ebf5b`;
+        // const encodeurl = encodeURI(url);
+        axios.get(url)
+            .then(async (res) => {
+                let response = "";
+                if(res.data.count > 0){
+                    let obj = [];
+                    res.data.records.forEach(element => {obj.push(`\n\n<b>Номер записи:</b> ${element.num},\n<b>Дата окончания ДК:</b> ${element.dcExpirationDate},\n<b>Адрес выдачи ДК:</b> ${element.pointAddress},\n<b>Шасси</b> ${element.chassis},\n<b>Кузов:</b> ${element.body},\n<b>Оператор:</b> ${element.operatorName},\n<b>Показания одометра:</b> ${element.odometerValue} \n<b>Номер ДК:</b> ${element.dcNumber} \n<b>Дата выдачи ДК:</b> ${element.dcDate} \n<b>Модель ТС:</b> ${element.model} \n<b>Марка ТС:</b> ${element.brand}\n<b>VIN:</b> ${element.vin}\n`); return obj});
+
+                    let dc = [];
+                    res.data.previousDcs.forEach(element => {dc.push(`\n\n<b>Показания одометра:</b> ${element.odometerValue}\n<b>Дата окончания ДК:</b> ${element.dcExpirationDate}\n<b>Номер ДК:</b> ${element.dcNumber}\n<b>Дата начала ДК:</b> ${element.dcDate}\n`); return dc;})
+                    response = `<b>Количество найденных записей:</b> ${res.data.count}\n<b>Записи:</b> ${obj}\n\n<b>Предидущие ДК:</b> ${dc}`;
+                }
+                else{
+                    response = "Данные о ДК не найдены";
+                }
+                 resolve(response);
+            })
+            .catch((error) => console.log(error));
+    });
+}
+
 const wasted = async (text) => {
     return new Promise((resolve,reject) => {
         const url = `https://api-cloud.ru/api/gibdd.php?type=wanted&vin=${text}&token=a93da7c54a600fe89d6770f6f45ebf5b`;
@@ -86,7 +165,7 @@ const wasted = async (text) => {
                 let response = "";
                 if(res.data.count > 0){
                     let obj = [];
-                    res.data.records.forEach(element => {obj.push(`\n\n<b>Номер ареста:</b> ${element.num},\n <b>Регион инициатора розыска:</b> ${element.AccidentDateTime},\n <b>Номер кузова:</b> ${element.VehicleDamageState},\n <b> Марка (модель) ТС</b> ${element.AccidentNumber},\n <b>Дата постоянного учета в розыске:</b> ${element.AccidentType},\n <b>VIN ТС:</b> ${element.DamageDestription},\n <b>Год ТС:</b> ${element.VehicleMark} \n `); return obj});
+                    res.data.records.forEach(element => {obj.push(`\n\n<b>Номер ареста:</b> ${element.num},\n<b>Регион инициатора розыска:</b> ${element.AccidentDateTime},\n <b>Номер кузова:</b> ${element.VehicleDamageState},\n <b> Марка (модель) ТС</b> ${element.AccidentNumber},\n <b>Дата постоянного учета в розыске:</b> ${element.AccidentType},\n <b>VIN ТС:</b> ${element.DamageDestription},\n <b>Год ТС:</b> ${element.VehicleMark} \n `); return obj});
                     response = `<b>🚨🚨🚨Количество в розыске:</b> ${res.data.count}\n <b>Записи:</b> ${obj}`;
                 }
                 else{
@@ -104,7 +183,7 @@ let vin = async (text) => {
         const url = `https://api-cloud.ru/api/vindecoder.php?type=vin&vin=${text}&token=a93da7c54a600fe89d6770f6f45ebf5b`;
         axios.get(url)
         .then(async (res) => {
-            response = `👮👮👮\n<b>Марка:</b> ${res.data.Make.value}\n<b>Модель:</b> ${res.data.Model.value}\n<b>Год:</b> ${res.data.Year.value}\n<b>Тип кузова:</b> ${res.data.Body.value}\n<b>Тип двигателя:</b> ${res.data.Engine.value}\n<b>Тип топлива:</b> ${res.data.Fuel.value}\n<b>Тип трансмиссии:</b> ${res.data.Transmission.value}\n<b>Класс авто:</b> ${res.data.classCar.value}\n<b>Тип авто:</b> ${res.data.typeCar.value}\n<b>Произведено в:</b> ${res.data.Manufactured.value}\n<b>Отличие кузова:</b> ${res.data.Body_type.value}\n<b>Количество дверей:</b> ${res.data.Number_doors.value}\n<b>Количество мест:</b> ${res.data.Number_seats.value}\n<b>Рабочий объем двигателя:</b> ${res.data.Displacement.value}\n<b>Объем двигателя:</b> ${res.data.Displacement_nominal.value}\n<b>Количество клапанов:</b> ${res.data.Engine_valves.value}\n<b>Количество цилиндров:</b> ${res.data.cylinders.value}\n<b>Механическая коробка передач:</b> ${res.data.gearbox.value}\n<b>Мощность л.с.:</b> ${res.data.HorsePower.value}\n<b>Мощность двигателя кВт:</b> ${res.data.KiloWatts.value}\n<b>Стандарт выбросов:</b> ${res.data.Emission_standard.value}\n<b>Трансмиссия:</b> ${res.data.Driveline.value}\n`;
+            response = `👮👮👮\n<b>Марка:</b> ${res.data.Make.value}\n<b>Модель:</b> ${res.data.Model.value}\n<b>Год:</b> ${res.data.Year.value}\n<b>Тип кузова:</b> ${res.data.Body.value}\n<b>Тип двигателя:</b> ${res.data.Engine.value}\n<b>Тип топлива:</b> ${res.data.Fuel.value}\n<b>Тип трансмиссии:</b> ${res.data.Transmission.value}\n<b>Класс авто:</b> ${res.data.classCar.value}\n<b>Тип авто:</b> ${res.data.typeCar.value}\n<b>Произведено в:</b> ${res.data.Manufactured.value}\n<b>Отличие кузова:</b> ${res.data.Body_type.value}\n<b>Количество дверей:</b> ${res.data.Number_doors.value}\n<b>Количество мест:</b> ${res.data.Number_seats.value}\n<b>Рабочий объем двигателя:</b> ${res.data.Displacement.value}\n<b>Объем двигателя:</b> ${res.data.Displacement_nominal.value}\n<b>Количество клапанов:</b> ${res.data.Engine_valves.value}\n<b>Количество цилиндров:</b> ${res.data.cylinders.value}\n<b>Механическая коробка передач:</b> ${res.data.gearbox.value}\n<b>Мощность л.с.:</b> ${res.data.HorsePower.value}\n<b>Мощность двигателя кВт:</b> ${res.data.KiloWatts.value}\n<b>Стандарт выбросов:</b> ${res.data.Emission_standard.value}\n<b>Трансмиссия:</b> ${res.data.Driveline.value}\n`;   
             resolve(response);
         })
         .catch((error) => console.log(error));
@@ -131,13 +210,34 @@ const gost = async (text) => {
     });
 }
 
+let customs = async (text) => {
+    return new Promise((resolve, reject) => {
+        let response = "response: ";
+        const url = `https://api-cloud.ru/api/fts.php?type=auto&vin=${text}&token=a93da7c54a600fe89d6770f6f45ebf5b`;
+        axios.get(url)
+        .then(async (res) => {
+            if(res.data.count > 0) {
+                console.log(res.data);
+                response = `👮👮👮\n<b>Номер VIN:</b> ${res.data.VIN.value}\n<b>Модель:</b> ${res.data.model.value}\n<b>Номер шасси:</b> ${res.data.shassi.value}\n<b>Номер кузова:</b> ${res.data.kuzov.value}\n<b>Дата выпуска в свободное обращение:</b> ${res.data.date.value}\n`;
+            } else {
+                response = res.data.message;
+            }
+            resolve(response);
+        })
+        .catch((error) => console.log(error));
+    });
+}
+
 module.exports = {
     vin,
     gibdd,
     gost,
     restrict,
     dtp,
-    wasted
+    wasted,
+    customs,
+    zalog,
+    eaisto
 }
 
 // JTMHT05J505009419
