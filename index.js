@@ -64,18 +64,26 @@ const start = async () => {
                 await bot.sendSticker(chatId, "https://tlgrm.eu/_/stickers/697/ba1/697ba160-9c77-3b1a-9d97-86a9ce75ff4d/5.webp");
                 await bot.sendMessage(chatId,"Hello, Admin\nОтправь мне телефон номер или никнэйм пользователя, без @. Например: whoisadmin");
             } else {
-                await UserModel.findOne( {where: { userName: msg.chat.username.toString() } } ).then(async (user) => {
-                        user.update({chatId: chatId.toString()});
-                        allow = 1;
-                        await bot.sendSticker(chatId, 'https://tlgrm.eu/_/stickers/ccd/a8d/ccda8d5d-d492-4393-8bb7-e33f77c24907/1.webp');
-                        return bot.sendMessage(chatId, 'Добро пожаловать в телеграм бот Checkauto\nЗдесь вы сможете получить информацию о машине через вин-код. Чекавто проверяет юр. чистоту авто по данным РФ, (остальные страны, Корея, Америка, Дубай по запросу в личку админу)\n\nОтправьте /info боту чтобы узнать число остатки своих запросов')
-                    }).catch(() => {
-                        return bot.sendMessage(chatId, `Вы кажется не верифицированы, пожалуйста свяжитесь с Админом @wayiwkimkeptur:)`)  
-                    })
+                if(msg.chat.username === undefined){
+                    console.log("s");
+                    return bot.sendMessage(chatId, `Вы кажется не верифицированы, пожалуйста добавьте @username и свяжитесь с Админом @wayiwkimkeptur:)`);
+                } else {
+                    await UserModel.findOne( {where: { userName: msg.chat.username.toString() } } ).then(async (user) => {
+                            user.update({chatId: chatId.toString()});
+                            allow = 1;
+                            await bot.sendSticker(chatId, 'https://tlgrm.eu/_/stickers/ccd/a8d/ccda8d5d-d492-4393-8bb7-e33f77c24907/1.webp');
+                            return bot.sendMessage(chatId, 'Добро пожаловать в телеграм бот Checkauto\nЗдесь вы сможете получить информацию о машине через вин-код. Чекавто проверяет юр. чистоту авто по данным РФ, (остальные страны, Корея, Америка, Дубай по запросу в личку админу)\n\nОтправьте /info боту чтобы узнать число остатки своих запросов')
+                        }).catch(() => {
+                            return bot.sendMessage(chatId, `Вы кажется не верифицированы, пожалуйста свяжитесь с Админом @wayiwkimkeptur:)`)  
+                        })
+                    }
                 }
         }
         else if(text === '/info'){
             if(!isAdmin){
+                if(msg.chat.username === undefined){
+                    return bot.sendMessage(chatId, `Вы кажется не верифицированы, пожалуйста добавьте @username и свяжитесь с Админом @wayiwkimkeptur:)`);
+                }
                 await UserModel.findOne({where: {userName: msg.chat.username}})
                 .then((user) => {
                     allow = 1;
@@ -100,6 +108,9 @@ const start = async () => {
             let words = text.split(' ');
             if(words.length == 1){
                 if(!isAdmin){
+                    if(msg.chat.username === undefined){
+                        return bot.sendMessage(chatId, `Вы кажется не верифицированы, пожалуйста добавьте @username и свяжитесь с Админом @wayiwkimkeptur:)`);
+                    }
                     await UserModel.findOne({where: {userName: msg.chat.username}}).then((user) => {
                         allow = 1;
                         requestNumber = user.requests; 
@@ -141,6 +152,9 @@ const start = async () => {
             }   
             else{
                 if(!isAdmin){
+                    if(msg.chat.username == "undefined"){
+                        return bot.sendMessage(chatId, `Вы кажется не верифицированы, пожалуйста добавьте @username и свяжитесь с Админом @wayiwkimkeptur:)`);
+                    }
                     await UserModel.findOne({where: {userName: msg.chat.username}}).then((user) => {
                         allow = 1;
                         requestNumber = user.requests; 
