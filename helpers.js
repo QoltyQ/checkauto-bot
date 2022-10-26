@@ -1,4 +1,33 @@
 const axios = require('axios');
+const FormData = require('form-data');
+
+const formData = new FormData();
+
+const formUrlEncoded = x =>
+   Object.keys(x).reduce((p, c) => p + `&${c}=${encodeURIComponent(x[c])}`, '')
+
+formData.append('vin', "MX1TA69V9KA093206");
+
+const recycle = async (text) => {
+    return new Promise((resolve,reject) => {
+        let res = '';
+        axios({
+            method: "post",
+            url: "https://app.recycle.kz/index/ajax_check",
+            data: formUrlEncoded({
+              vin: `${text}`
+           }),
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          })
+            .then(function (response) {
+                if(response.data.found)
+                    res = `<b>Результат поиска по VIN</b>: ${response.data.vin}\n<b>Объем / вес</b>: ${response.data.volume}\n<b>Дата документа</b>: ${response.data.date}\n<b>Номер сертификата</b>: ${response.data.order}\n<b>Категория ТС</b>: ${response.data.category}\n`
+                else 
+                    res = `В нашей базе по данному vin-коду не найдено оплат.`
+                resolve(res);
+            })
+    })
+} 
 
 const gibdd = async (text) => {
     return new Promise((resolve, reject) => {
@@ -237,7 +266,8 @@ module.exports = {
     wasted,
     customs,
     zalog,
-    eaisto
+    eaisto,
+    recycle
 }
 
 // JTMHT05J505009419

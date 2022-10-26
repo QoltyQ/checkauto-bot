@@ -4,7 +4,9 @@ const token = '5451607839:AAEp7E18xySiHJDcanCfiYerej926oAE9OE';
 
 const bot = new TelegramApi(token, {polling: true})
 
-const {vin, gibdd, restrict, gost, dtp, wasted, customs, zalog, eaisto} = require('./helpers');
+const {vin, gibdd, restrict, gost, dtp, wasted, customs, zalog, eaisto, recycle} = require('./helpers');
+const aster = require('./aster-puppeteer');
+
 
 const admin = "709029307";
 
@@ -13,7 +15,7 @@ const gameOptions = {
         inline_keyboard: [
             [{text: 'Расшифровка', callback_data: 'vin'}, {text: 'ГИБДД', callback_data: 'gibdd'} ],
             [{text: 'Отзывные компании ТС', callback_data: 'gost'}, {text: 'Таможня', callback_data: 'customs'}],
-            [{text: 'Реестр Залогов', callback_data: 'zalog'}]
+            [{text: 'Реестр Залогов', callback_data: 'zalog'}, {text: 'Утильсбор', callback_data: 'recycle'}]
         ]
     })
 };
@@ -138,7 +140,40 @@ const start = async () => {
                         return bot.sendMessage(chatId, `Пользователь создан с верификацией: ${user.isVerified}, и с лимитом: ${user.requests}`);
                     }).catch((error) => console.log(error));
                 }
-            }   
+            } 
+            else if(words.length == 2){
+                if(!isAdmin){
+                    await UserModel.findOne({where: {userName: msg.chat.username}}).then((user) => {
+                        allow = 1;
+                        requestNumber = user.requests; 
+                    }).catch(() => allow = 0);
+
+                    let grnz = words[0];
+                    let techpassportNumber = words[1];
+
+                    if(techpassportNumber.length == 10){
+                        if(allow){
+                            if(requestNumber > 0){
+                                // console.log(requestNumber)
+                                requestNumber--;
+                                await updateRequest(requestNumber,msg.chat.username);
+                                await bot.sendMessage(chatId,"Это может занять 2 минуты, пожалуйста подождите");
+                                await aster(grnz, techpassportNumber).then(async (ans) => {
+                                    await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
+                                });     
+                                if(requestNumber > 0)
+                                    await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
+                                else
+                                    await bot.sendMessage(chatId,`Ой у вас закончились число доступных запросов, свяжитесь с Админом @wayiwkimkeptur :)`);
+                            } else{
+                                await bot.sendMessage(chatId, "У вас кажется закончились число доступных запросов. Пожалуйста, свяжитесь с Админом @wayiwkimkeptur:)");
+                            }
+                        } else {
+                            await bot.sendMessage(chatId, "Вы не верифицированы, пожалуйста свяжитесь с Админом @wayiwkimkeptur:)");
+                        }
+                    }
+                }
+            }  
             else{
                 if(!isAdmin){
                     await UserModel.findOne({where: {userName: msg.chat.username}}).then((user) => {
@@ -227,6 +262,18 @@ const start = async () => {
             await updateRequest(requestNumber,msg.message.chat.username);
             await bot.sendMessage(chatId,"Это может занять некоторое время, пожалуйста подождите");
             await zalog(vinCode).then(async (ans) => {
+                await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
+            });     
+            if(requestNumber > 0)
+                await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
+            else
+                await bot.sendMessage(chatId,`Ой у вас закончились число доступных запросов, свяжитесь с Админом @wayiwkimkeptur :)`);
+        }
+        else if(data === "recycle"){
+            requestNumber--;
+            await updateRequest(requestNumber,msg.message.chat.username);
+            await bot.sendMessage(chatId,"Это может занять некоторое время, пожалуйста подождите");
+            await recycle(vinCode).then(async (ans) => {
                 await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
             });     
             if(requestNumber > 0)
