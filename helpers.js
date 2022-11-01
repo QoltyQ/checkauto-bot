@@ -165,8 +165,8 @@ const wasted = async (text) => {
                 let response = "";
                 if(res.data.count > 0){
                     let obj = [];
-                    res.data.records.forEach(element => {obj.push(`\n\n<b>Номер ареста:</b> ${element.num},\n<b>Регион инициатора розыска:</b> ${element.AccidentDateTime},\n <b>Номер кузова:</b> ${element.VehicleDamageState},\n <b> Марка (модель) ТС</b> ${element.AccidentNumber},\n <b>Дата постоянного учета в розыске:</b> ${element.AccidentType},\n <b>VIN ТС:</b> ${element.DamageDestription},\n <b>Год ТС:</b> ${element.VehicleMark} \n `); return obj});
-                    response = `<b>🚨🚨🚨Количество в розыске:</b> ${res.data.count}\n <b>Записи:</b> ${obj}`;
+                    res.data.records.forEach(element => {obj.push(`\n\n<b>Номер ареста:</b> ${element.num},\n<b>Регион инициатора розыска:</b> ${element.w_reg_inic},\n<b>Номер кузова:</b> ${element.w_kuzov},\n<b> Марка (модель) ТС</b> ${element.w_model},\n<b>Дата постоянного учета в розыске:</b> ${element.w_data_pu},\n<b>VIN ТС:</b> ${element.w_vin},\n<b>Год ТС:</b> ${element.w_god_vyp} \n`); return obj});
+                    response = `<b>🚨🚨🚨Количество в розыске:</b> ${res.data.count}\n<b>Записи:</b> ${obj}`;
                 }
                 else{
                     response = res.data.message;
