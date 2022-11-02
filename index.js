@@ -201,7 +201,21 @@ const start = async () => {
             
             await bot.sendMessage(chatId,"Ищем наличие ограничений машины, пожалуйста подождите");
             await restrict(vinCode).then(async (ans) => {
-                await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
+                    const max_size = 4096
+                    var messageString = ans
+                    var amount_sliced = messageString.length / max_size
+                    var start = 0
+                    var end = max_size
+                    var message;
+                    var messagesArray = []
+                    for (let i = 0; i < amount_sliced; i++) {
+                        message = messageString.slice(start, end)
+                        await bot.sendMessage(chatId,message);
+                        messagesArray.push(message)
+                        start = start + max_size
+                        end = end + max_size
+                    }
+                    
             });
             
             await bot.sendMessage(chatId,"Ищем участие в дорожно-транспортных происшествиях машины, пожалуйста подождите");

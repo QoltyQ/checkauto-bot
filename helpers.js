@@ -93,21 +93,29 @@ const restrict = async (text) => {
     return new Promise((resolve,reject) => {
         const url = `https://api-cloud.ru/api/gibdd.php?type=restrict&vin=${text}&token=a93da7c54a600fe89d6770f6f45ebf5b`;
         const encodeurl = encodeURI(url);
+        let messages = [];
         axios.get(encodeurl)
             .then(async (res) => {
+                let totalString = '';
                 let response = "a";
-                console.log("asfasfdsa");
                 if(res.data.count > 0){
                     let obj = [];
-                    res.data.records.forEach(element => {obj.push(`\n\n<b>Порядковый номер штрафа:</b> ${element.num},\n<b>Регион:</b> ${element.regname},\n<b>Основание ограничения:</b> ${element.osnOgr},\n<b>Ключ ГИБДД:</b> ${element.gid},\n<b>Год транспортного средства:</b> ${element.tsyear},\n<b>VIN транспортного средства:</b> ${element.tsVIN},\n<b>Дата наложения ограничения:</b> ${element.dateogr} \n<b>Вид ограничения:</b> ${element.ogrkod} \n<b>Расшифровка Вид ограничения:</b> ${element.ogrkodinfo} \n<b>Марка (модель) ТС:</b> ${element.tsmodel} \n<b>Номер кузова:</b> ${element.tsKuzov} \n<b>Срок окончания ограничения:</b> ${element.dateadd} \n<b>Телефон инициатора:</b> ${element.phone} \n<b>Кем наложено:</b> ${element.divtype} \n<b>Расшифровка Кем наложено:</b> ${element.divtypeinfo} `); return obj});
-                    response = `<b>Количество ограничений:</b> ${res.data.count}\n<b>Записи:</b> ${obj}`;
+                    res.data.records.forEach(element => {obj.push(`\n\nПорядковый номер штрафа: ${element.num},\nРегион: ${element.regname},\nОснование ограничения: ${element.osnOgr},\nКлюч ГИБДД: ${element.gid},\nГод транспортного средства: ${element.tsyear},\nVIN транспортного средства: ${element.tsVIN},\nДата наложения ограничения: ${element.dateogr} \nВид ограничения: ${element.ogrkod} \nРасшифровка Вид ограничения: ${element.ogrkodinfo} \nМарка (модель) ТС: ${element.tsmodel} \nНомер кузова: ${element.tsKuzov} \nСрок окончания ограничения: ${element.dateadd} \nТелефон инициатора: ${element.phone} \nКем наложено: ${element.divtype} \nРасшифровка Кем наложено: ${element.divtypeinfo} `); messages.push(obj); return obj});
+                    response = `Количество ограничений: ${res.data.count}\nЗаписи:`;
+                    messages.unshift(response);
+                    messages.forEach(element => {
+                        totalString += element;    
+                    });
                 }
                 else{
                     response = res.data.message;
+                    totalString += response;
                 }
-                 resolve(response);
+                resolve(totalString);
             })
-            .catch((error) => console.log(error));
+            .catch((error) => {
+                throw new Error()
+            });
     });
 }
 
