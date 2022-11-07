@@ -101,7 +101,7 @@ const start = async () => {
                 await UserModel.findAll().then((user) => console.log(user));
             }
         }
-        else if(text === undefined){
+        else if(!text){
             return bot.sendMessage(chatId, `Я вас не понимаю, пожалуйста попробуйте позже`);
         } 
         else {
