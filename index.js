@@ -11,9 +11,7 @@ const admin = "709029307";
 const gameOptions = {
     reply_markup: JSON.stringify({
         inline_keyboard: [
-            [{text: 'Расшифровка', callback_data: 'vin'}, {text: 'ГИБДД', callback_data: 'gibdd'} ],
-            [{text: 'Отзывные компании ТС', callback_data: 'gost'}, {text: 'Таможня', callback_data: 'customs'}],
-            [{text: 'Реестр Залогов', callback_data: 'zalog'}]
+            [{text: 'Полная информация', callback_data: 'vin'}]
         ]
     })
 };
@@ -180,20 +178,13 @@ const start = async () => {
         if (data === "vin") {
             requestNumber--;
             await updateRequest(requestNumber,msg.message.chat.username);
-            await bot.sendMessage(chatId,"Это может занять некоторое время, пожалуйста подождите");
+            await bot.sendMessage(chatId,"Расшифруем вин-код, пожалуйста подождите");
+
             await vin(vinCode).then(async (ans) => {
                 await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
-            });     
-            if(requestNumber > 0)
-                await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
-            else
-                await bot.sendMessage(chatId,`Ой у вас закончились число доступных запросов, свяжитесь с Админом @wayiwkimkeptur :)`);
-        } 
-        else if(data === "gibdd"){
-            requestNumber--;
-            await updateRequest(requestNumber,msg.message.chat.username);
-            
-            await bot.sendMessage(chatId,"Это может занять некоторое время, пожалуйста подождите");
+            });
+
+            await bot.sendMessage(chatId,"Ищем информацию машины из ГИБДД, пожалуйста подождите");
             await gibdd(vinCode).then(async (ans) => {
                 await bot.sendMessage(chatId,"Информация машины из ГИБДД")
                 await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
@@ -232,48 +223,27 @@ const start = async () => {
             await eaisto(vinCode).then(async (ans) => {
                 await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
             });
-            
-            if(requestNumber > 0)
-                await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
-            else
-                await bot.sendMessage(chatId,`Ой у вас закончились число доступных запросов, свяжитесь с Админом @wayiwkimkeptur :)`);
-        }
-        else if(data === "customs"){
-            requestNumber--;
-            await updateRequest(requestNumber,msg.message.chat.username);
-            await bot.sendMessage(chatId,"Это может занять некоторое время, пожалуйста подождите");
-            await customs(vinCode).then(async (ans) => {
-                await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
-            });     
-            if(requestNumber > 0)
-                await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
-            else
-                await bot.sendMessage(chatId,`Ой у вас закончились число доступных запросов, свяжитесь с Админом @wayiwkimkeptur :)`);
-        }
-        else if(data === "zalog"){
-            requestNumber--;
-            await updateRequest(requestNumber,msg.message.chat.username);
-            await bot.sendMessage(chatId,"Это может занять некоторое время, пожалуйста подождите");
-            await zalog(vinCode).then(async (ans) => {
-                await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
-            });     
-            if(requestNumber > 0)
-                await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
-            else
-                await bot.sendMessage(chatId,`Ой у вас закончились число доступных запросов, свяжитесь с Админом @wayiwkimkeptur :)`);
-        }
-        else{
-            requestNumber--;
-            await updateRequest(requestNumber,msg.message.chat.username);
-            await bot.sendMessage(chatId,"Это может занять некоторое время, пожалуйста подождите");
+
+            await bot.sendMessage(chatId,"Проверяем информацию от Отзывных компании");
             await gost(vinCode).then(async (ans) => {
                 await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
             });
+
+            await bot.sendMessage(chatId,"Проверяем информацию о таможенном оформлении");
+            await customs(vinCode).then(async (ans) => {
+                await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
+            });    
+
+            await bot.sendMessage(chatId,"Проверяем залоги");
+            await zalog(vinCode).then(async (ans) => {
+                await bot.sendMessage(chatId,ans,{parse_mode: 'HTML'});
+            });
+
             if(requestNumber > 0)
                 await bot.sendMessage(chatId,`Хотите проверить еще раз?`,againOptions);
             else
                 await bot.sendMessage(chatId,`Ой у вас закончились число доступных запросов, свяжитесь с Админом @wayiwkimkeptur :)`);
-        }  
+        } 
     })
 }
 
